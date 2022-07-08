@@ -1,23 +1,35 @@
-import { Controller, Get, Post, Req, Res, Session } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Req,
+  Res,
+  Patch,
+  HttpException,
+  HttpCode,
+  Delete,
+  Session,
+} from "@nestjs/common";
 import { Request, Response } from "express";
+import session from "express-session";
 import { AppService } from "./app.service";
+import { gameModes, ICreate } from "./types/types";
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Post("create")
-  getHello(@Req() req: any, @Res() res: any) {
-    const session = req.session;
-    session.balance = req.body.balance;
-    res.send("123213");
-    // return this.appService.getHello();
+  create(@Req() req: any, @Res() res: Response) {
+    return res.json(this.appService.create(req));
   }
 
-  @Get("test")
-  getTest(@Req() request: Request): string {
-    console.log(request.session, new Date());
-    // request.session.aboba = new Date().toString();
-    return `${process.env.SECRET} asasdas`;
+  @Patch("spin")
+  spin(@Req() req: any, @Res() res: Response) {
+    return res.json(this.appService.spin(req));
+  }
+  @Delete("end")
+  end(@Req() req: any, @Res() res: any) {
+    console.log(req.session);
+    res.json(this.appService.end(req.session));
   }
 }

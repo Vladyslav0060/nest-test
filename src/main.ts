@@ -24,5 +24,6 @@ async function start() {
   });
 
   await app.listen(3000);
+  process.on("uncaughtException", function () {});
 }
 start();
