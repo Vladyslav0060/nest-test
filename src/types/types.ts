@@ -1,14 +1,28 @@
-import { Request, Response } from "express";
-
 export type gameModes = "normal" | "testing";
 export type betTypes = number | "odd" | "even";
 
-export interface ICreate extends Request {
-  balance: number | string;
-  gameMode: string;
+interface ISession {
+  balance?: number;
+  gameMode?: gameModes;
+  startBalance?: number;
 }
 
-export interface ISpin {
+export type IBet = {
   betAmount: number;
-  betType: number | betTypes;
+  betType: betTypes;
+};
+
+export interface ISpin {
+  session: ISession;
+  body: {
+    bets: [IBet];
+  };
+}
+
+export interface ICreate {
+  session: ISession;
+  body: {
+    gameMode: gameModes;
+    balance: number | string;
+  };
 }

@@ -1,13 +1,15 @@
-import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
+import { HttpAdapterHost, NestFactory } from "@nestjs/core";
+import { AppModule } from "./App/app.module";
+import { AllExceptionsFilter } from "./all-exceptions.filter";
 import * as session from "express-session";
-import * as redis from "redis";
+import Redis from "ioredis";
 const RedisStore = require("connect-redis")(session);
-const Redis = require("ioredis");
 
 async function start() {
   const app = await NestFactory.create(AppModule);
   const redisClient = new Redis();
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
   app.use(
     session({
       secret: process.env.SECRET,
@@ -16,14 +18,7 @@ async function start() {
       store: new RedisStore({ client: redisClient }),
     })
   );
-  redisClient.on("error", function (err) {
-    console.log("Could not establish a connection with redis. " + err);
-  });
-  redisClient.on("connect", function (err) {
-    console.log("Connected to redis successfully");
-  });
-
-  await app.listen(3000);
+  await app.listen(3000, () => console.log("started on 3000"));
   process.on("uncaughtException", function () {});
 }
 start();
