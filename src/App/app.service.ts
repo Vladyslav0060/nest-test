@@ -71,11 +71,19 @@ export class AppService {
   spin(req: ISpin): number {
     const { body, session } = req;
     this.validationSpin(body.bets, session.balance);
-    body.bets.forEach((bet: any) => {
+    body.bets.forEach((bet: IBet) => {
       if (bet.betAmount > session.balance)
         throw new HttpException("Insufficient funds on balance", 403);
       else if (bet.betType < 0 || bet.betType > 36)
         throw new HttpException("Insufficient funds on balance", 400);
+      if (
+        typeof bet.betType === "number" &&
+        bet.winningNumber &&
+        session.gameMode === "testing"
+      ) {
+        this.calculateWin(bet, session, bet.winningNumber);
+        return;
+      }
       const randomWinningNumber = Math.floor(Math.random() * 37);
       this.calculateWin(bet, session, randomWinningNumber);
     });
