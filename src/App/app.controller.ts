@@ -8,7 +8,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Post("create")
-  create(@Req() req: ICreate, @Res() res: Response) {
+  create(@Req() req: any, @Res() res: Response) {
     return res.json(this.appService.create(req));
   }
 

@@ -5,7 +5,6 @@ import { IBet, ICreate, ISpin } from "../types/types";
 @Injectable()
 export class AppService {
   constructor(private readonly jwtService: JwtService) {}
-
   private getBalance(balance: string | number) {
     return typeof balance === "string"
       ? this.jwtService.verify(balance).balance
@@ -33,15 +32,17 @@ export class AppService {
   }
 
   private validationCreate(req: ICreate) {
-    const { balance, gameMode } = req.body;
-    if (req.session?.balance)
+    const { session, body, headers } = req;
+    const token = headers.authorization.split("Bearer ")[1];
+    if (session?.balance)
       throw new HttpException("Ongoing session is not ended", 403);
-    if (gameMode === "normal" && typeof balance === "string") {
-      if (!this.jwtService.verify(balance))
-        throw new HttpException("Invalid token", 403);
-    } else if (gameMode === "testing" && typeof balance === "number") {
+    if (body.gameMode === "normal") {
+      if (typeof this.jwtService.verify(token).balance !== "number")
+        throw new HttpException("Invalid token", 401);
       return;
-    } else throw new HttpException("Invalid balance", 400);
+    } else if (body.gameMode === "testing" && typeof body.balance === "number")
+      return;
+    else throw new HttpException("Invalid balance", 400);
   }
 
   private validationSpin(bets: IBet[], balance: number) {
@@ -56,9 +57,12 @@ export class AppService {
   }
 
   create(req: ICreate): number {
-    const { session, body } = req;
+    const { session, body, headers } = req;
+    const token = headers.authorization.split("Bearer ")[1];
     this.validationCreate(req);
-    session.balance = this.getBalance(body.balance);
+    session.balance = this.getBalance(
+      body.gameMode === "normal" ? token : body.balance
+    );
     session.gameMode = req.body.gameMode;
     session.startBalance = session.balance;
     return session.balance;
