@@ -10,6 +10,7 @@ interface ISession {
 export type IBet = {
   betAmount: number;
   betType: betTypes;
+  winningNumber?: number;
 };
 
 export interface ISpin {
