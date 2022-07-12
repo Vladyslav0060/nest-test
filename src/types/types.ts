@@ -21,6 +21,9 @@ export interface ISpin {
 
 export interface ICreate {
   session: ISession;
+  headers: {
+    authorization?: string;
+  };
   body: {
     gameMode: gameModes;
     balance: number | string;
